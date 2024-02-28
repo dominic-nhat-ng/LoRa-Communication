@@ -1,5 +1,7 @@
 # _Sample project_
 
+**Can read description in note iot-garden below**
+
 (See the README.md file in the upper level 'examples' directory for more information about examples.)
 
 This is the simplest buildable example. The example is used by command `idf.py create-project`
