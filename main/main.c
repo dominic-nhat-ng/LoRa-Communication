@@ -23,9 +23,9 @@
 
 #include "cJSON.h"
 
-#define SSID "Giangnam Coffee VN"
+#define SSID "C23.11_2.4G"
 
-#define PASS ""
+#define PASS "1234567890"
 
 
 static const char *TAG = "MQTT_TCP";
@@ -109,7 +109,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-        esp_mqtt_client_subscribe(client, "v1/devices/me/attributes", 0);
+        esp_mqtt_client_subscribe(client, "v1/devices/me/telemetry", 0);
 
         // Initialize DHT11 sensor
         DHT11_init(GPIO_NUM_4);
@@ -120,7 +120,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
         // Construct the JSON message
         snprintf(result, sizeof(result), "{\"temperature\":%d}", dht_data.temperature);
 
-        esp_mqtt_client_publish(client, "v1/devices/me/attributes", result, 0, 1, 0);
+        esp_mqtt_client_publish(client, "v1/devices/me/telemetry", result, 0, 1, 0);
         break;
 
     case MQTT_EVENT_DISCONNECTED:
@@ -158,17 +158,19 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = "mqtt://mqtt.eclipseprojects.io",
-        .broker.address.hostname = "localhost",
-        .broker.address.port = 1883,
-        .credentials.client_id = "jifkerflj",
-        .credentials.username = "Nhat",
-        .credentials.authentication.password = "123456",
+        .broker.address.uri = "mqtt://Nhat:Nhat@demo.thingsboard.io:1883",
+        // .broker.address.hostname = "172.0.0.1",
+        // .broker.address.port = 1883,
+        .credentials.client_id = "Nhat",
+        // .credentials.username = "Nhat",
+        // .credentials.authentication.password = "Nhat",
     };
+    // while (1)
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, client);
     esp_mqtt_client_start(client);
 }
+
 
 void app_main(void)
 {
@@ -177,6 +179,6 @@ void app_main(void)
 
     vTaskDelay(2000 / portTICK_PERIOD_MS);
     printf("WIFI was initiated ...........\n");
-
+    
     mqtt_app_start();
 }
