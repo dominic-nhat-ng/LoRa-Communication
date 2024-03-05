@@ -23,34 +23,22 @@
 
 #include "cJSON.h"
 
-#define SSID "C23.11_2.4G"
+#define SSID "Nhật"
 
 #define PASS "1234567890"
 
 
 static const char *TAG = "MQTT_TCP";
 
-// static void parse_ota_config(const cJSON *object)
-// {
-//     if (object != NULL)
-//     {
-//         cJSON *server_url_response = cJSON_GetObjectItem(object, TB_SHARED_ATTR_FIELD_TARGET_FW_URL);
-//         if (cJSON_IsString(server_url_response) && (server_url_response->valuestring != NULL) && strlen(server_url_response->valuestring) < sizeof(shared_attributes.targetFwServerUrl))
-//         {
-//             memcpy(shared_attributes.targetFwServerUrl, server_url_response->valuestring, strlen(server_url_response->valuestring));
-//             shared_attributes.targetFwServerUrl[sizeof(shared_attributes.targetFwServerUrl) - 1] = 0;
-//             ESP_LOGI(TAG, "Received firmware URL: %s", shared_attributes.targetFwServerUrl);
-//         }
-
-//         cJSON *target_fw_ver_response = cJSON_GetObjectItem(object, TB_SHARED_ATTR_FIELD_TARGET_FW_VER);
-//         if (cJSON_IsString(target_fw_ver_response) && (target_fw_ver_response->valuestring != NULL) && strlen(target_fw_ver_response->valuestring) < sizeof(shared_attributes.targetFwVer))
-//         {
-//             memcpy(shared_attributes.targetFwVer, target_fw_ver_response->valuestring, strlen(target_fw_ver_response->valuestring));
-//             shared_attributes.targetFwVer[sizeof(shared_attributes.targetFwVer) - 1] = 0;
-//             ESP_LOGI(TAG, "Received firmware version: %s", shared_attributes.targetFwVer);
-//         }
-//     }
-// }
+char* create_json(int temperature, int humidity)
+{
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "temperature", temperature);
+    cJSON_AddNumberToObject(root, "humidity", humidity);
+    char *json_string = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    return json_string;
+}
 
 static void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
@@ -98,11 +86,11 @@ void wifi_connection()
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 {
 
+    char *json_data;
 
    // Convert temperature to a string
     struct dht11_reading dht_data;
     // char temperature_str[6]; // Increased size to accommodate larger temperatures
-    char result[50]; // Increased size to accommodate the entire JSON message
 
     esp_mqtt_client_handle_t client = event->client;
     switch (event->event_id)
@@ -115,12 +103,12 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
         DHT11_init(GPIO_NUM_4);
         dht_data = DHT11_read();
 
-        // snprintf(temperature_str, sizeof(temperature_str), "%d", dht_data.temperature);
+        json_data = create_json(dht_data.temperature, dht_data.humidity);
 
-        // Construct the JSON message
-        snprintf(result, sizeof(result), "{\"temperature\":%d}", dht_data.temperature);
+        esp_mqtt_client_publish(client, "v1/devices/me/telemetry", json_data, 0, 1, 0);
 
-        esp_mqtt_client_publish(client, "v1/devices/me/telemetry", result, 0, 1, 0);
+        free(json_data);
+
         break;
 
     case MQTT_EVENT_DISCONNECTED:
@@ -150,6 +138,26 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     return ESP_OK;
 }
 
+void mqtt_publish_task(void *vParameters)
+{
+    esp_mqtt_client_handle_t client = (esp_mqtt_client_handle_t)vParameters;
+
+
+    while(1)
+    {
+        struct dht11_reading dht_data = DHT11_read();
+
+        char *json_data = create_json(dht_data.temperature, dht_data.humidity);
+
+        // char result[50];
+        esp_mqtt_client_publish(client, "v1/devices/me/telemetry", json_data, 0, 1, 0);
+
+        free(json_data);
+
+        vTaskDelay(5000/portTICK_PERIOD_MS);
+    }
+}
+
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
     ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%" PRIi32 "", base, event_id);
@@ -158,10 +166,10 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = "mqtt://Nhat:Nhat@demo.thingsboard.io:1883",
+        .broker.address.uri = "mqtt://Nhat:Nhat@iot.tdlogy.com",
         // .broker.address.hostname = "172.0.0.1",
-        // .broker.address.port = 1883,
-        .credentials.client_id = "Nhat",
+        .broker.address.port = 1883,
+        .credentials.client_id = "hd4LQLPS9rCzh8COYnRc",
         // .credentials.username = "Nhat",
         // .credentials.authentication.password = "Nhat",
     };
@@ -169,6 +177,8 @@ static void mqtt_app_start(void)
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, client);
     esp_mqtt_client_start(client);
+
+    xTaskCreate(&mqtt_publish_task, "mqtt_publish_task", 4096, (void *)client, 5, NULL);
 }
 
 
