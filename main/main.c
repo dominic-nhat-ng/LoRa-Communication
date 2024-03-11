@@ -23,6 +23,16 @@
 
 #include "cJSON.h"
 
+
+#define CONFIG_CS_GPIO   GPIO_NUM_5
+#define CONFIG_RST_GPIO  GPIO_NUM_2
+#define CONFIG_MISO_GPIO GPIO_NUM_19
+#define CONFIG_MOSI_GPIO GPIO_NUM_25
+#define CONFIG_SCK_GPIO  GPIO_NUM_18
+
+#include "../lib/lora.c"
+// #define 
+
 #define SSID "Nhật"
 
 #define PASS "1234567890"
@@ -100,7 +110,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
         esp_mqtt_client_subscribe(client, "v1/devices/me/telemetry", 0);
 
         // Initialize DHT11 sensor
-        DHT11_init(GPIO_NUM_4);
+        DHT11_init(GPIO_NUM_26);
         dht_data = DHT11_read();
 
         json_data = create_json(dht_data.temperature, dht_data.humidity);
@@ -152,7 +162,7 @@ void mqtt_publish_task(void *vParameters)
         // char result[50];
         esp_mqtt_client_publish(client, "v1/devices/me/telemetry", json_data, 0, 1, 0);
 
-        free(json_data);
+        free(json_data);    
 
         vTaskDelay(5000/portTICK_PERIOD_MS);
     }
@@ -181,9 +191,29 @@ static void mqtt_app_start(void)
     xTaskCreate(&mqtt_publish_task, "mqtt_publish_task", 4096, (void *)client, 5, NULL);
 }
 
+void task_tx(void *p)
+{
+    while(1){
+        vTaskDelay(5000/portTICK_PERIOD_MS);
+
+        lora_send_packet((uint8_t *)"hello", 5);
+
+        ESP_LOGI("CHECKING TRANSMIT DATA", "send data successfull");
+
+    }
+    xTaskCreate(&task_tx, "task_tx", 2048, NULL, 5, NULL);
+
+}
 
 void app_main(void)
 {
+    lora_init();
+    lora_set_frequency(915e6);
+    lora_enable_crc();
+
+    //==============================//
+    xTaskCreate(&task_tx, "task_tx", 2048, NULL, 5, NULL);
+    
     nvs_flash_init();
     wifi_connection();
 
@@ -191,4 +221,5 @@ void app_main(void)
     printf("WIFI was initiated ...........\n");
     
     mqtt_app_start();
+
 }

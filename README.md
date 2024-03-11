@@ -36,4 +36,5 @@ They are not used or needed when building with CMake and idf.py.
 
 This application using esp32, can read data and publish to thingsboard platform
 
-This project in progress
+This project is in progress, completed push data from esp32 to thingsboard platform.
+
