@@ -32,9 +32,21 @@ Below is short explanation of remaining files in the project folder.
 ```
 Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system. 
 They are not used or needed when building with CMake and idf.py.
+
 # iot-garden
 
-This application using esp32, can read data and publish to thingsboard platform
+This application uses an ESP32 to read data and publish it to the ThingsBoard platform.
 
-This project is in progress, completed push data from esp32 to thingsboard platform.
+This project is currently in progress.
 
+I've completed the task of pushing data from the ESP32 to the ThingsBoard platform.
+
+I have also completed the transmission and reception of data from the ESP32 to a Raspberry Pi through LoRa. Currently, I am pushing data from the Raspberry Pi to ThingsBoard using Python. The final step will be to build a system that can be controlled by either the ESP32 or the Raspberry Pi with a sensor.
+
+This project was successfully built in one month.
+
+Through this project, I've learned about the ESP32, LoRa communication, and using SSH to control a Raspberry Pi. This was my first time coding with a Raspberry Pi and building a full embedded system, perhaps an IoT garden, or something similar.
+
+This project has been very beneficial for me. It has improved my programming skills, my ability to build an application, and my mindset about building a system in practice.
+
+Dominic Ng.
