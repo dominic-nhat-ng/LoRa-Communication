@@ -33,7 +33,7 @@
 #include "../lib/lora.c"
 // #define 
 
-#define SSID "Nhật"
+#define SSID "C23.11_2.4G"
 
 #define PASS "1234567890"
 
@@ -193,22 +193,32 @@ static void mqtt_app_start(void)
 
 void task_tx(void *p)
 {
-    while(1){
+    while(1)
+    {
+        struct dht11_reading dht_data = DHT11_read();
+
+        char *json_data = create_json(dht_data.temperature, dht_data.humidity);
+
+        // Get the length of the JSON data
+        int json_data_length = strlen(json_data);
+
         vTaskDelay(5000/portTICK_PERIOD_MS);
 
-        lora_send_packet((uint8_t *)"hello", 5);
+        // Send the JSON data via LoRa
+        lora_send_packet((uint8_t *)json_data, json_data_length);
 
-        ESP_LOGI("CHECKING TRANSMIT DATA", "send data successfull");
+        ESP_LOGI("CHECKING TRANSMIT DATA", "Data sent successfully");
 
+        // Free the JSON data
+        free(json_data);
     }
-    xTaskCreate(&task_tx, "task_tx", 2048, NULL, 5, NULL);
-
 }
 
 void app_main(void)
 {
+    // char *message = "hello";
     lora_init();
-    lora_set_frequency(915e6);
+    lora_set_frequency(434e6);
     lora_enable_crc();
 
     //==============================//
