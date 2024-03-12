@@ -47,10 +47,10 @@ Below is short explanation of remaining files in the project folder.
 │   ├── main.c
 │   └── test.html
 ├── process.txt
-├── README.md
+├── README.md                ||           This is the file you are currently reading
 ├── sdkconfig
 ├── sdkconfig.old
-└── workflow.txt                   This is the file you are currently reading
+└── workflow.txt                  
 ```
 Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system. 
 They are not used or needed when building with CMake and idf.py.
