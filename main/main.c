@@ -33,7 +33,7 @@
 #include "../lib/lora.c"
 // #define 
 
-#define SSID "Nhật"
+#define SSID "C23.11_2.4G"
 
 #define PASS "1234567890"
 
@@ -182,10 +182,10 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = "mqtt://Nhat:Nhat@iot.tdlogy.com",
+        .broker.address.uri = "mqtt://Nhat123:Nhat123@iot.tdlogy.com",
         // .broker.address.hostname = "172.0.0.1",
         .broker.address.port = 1883,
-        // .credentials.client_id = "hd4LQLPS9rCzh8COYnRc",
+        .credentials.client_id = "hd4LQLPS9rCzh8COYnRc",
         // .credentials.username = "Nhat",
         // .credentials.authentication.password = "Nhat",
     };
