@@ -33,7 +33,7 @@
 #include "../lib/lora.c"
 // #define 
 
-#define SSID "C23.11_2.4G"
+#define SSID "Nhật"
 
 #define PASS "1234567890"
 
@@ -134,9 +134,15 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
         ESP_LOGI(TAG, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
         break;
     case MQTT_EVENT_DATA:
-        ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-        printf("\nTOPIC=%.*s\r\n", event->topic_len, event->topic);
+        printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
         printf("DATA=%.*s\r\n", event->data_len, event->data);
+        if (strncmp(event->topic, "v1/devices/me/rpc/request/", event->topic_len) == 0) {
+            if (strncmp(event->data, "true", event->data_len) == 0) {
+                gpio_set_level(GPIO_NUM_12, 1);
+            } else if (strncmp(event->data, "false", event->data_len) == 0) {
+                gpio_set_level(GPIO_NUM_12, 0);
+            }
+        }
         break;
     case MQTT_EVENT_ERROR:
         ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
@@ -179,7 +185,7 @@ static void mqtt_app_start(void)
         .broker.address.uri = "mqtt://Nhat:Nhat@iot.tdlogy.com",
         // .broker.address.hostname = "172.0.0.1",
         .broker.address.port = 1883,
-        .credentials.client_id = "hd4LQLPS9rCzh8COYnRc",
+        // .credentials.client_id = "hd4LQLPS9rCzh8COYnRc",
         // .credentials.username = "Nhat",
         // .credentials.authentication.password = "Nhat",
     };
