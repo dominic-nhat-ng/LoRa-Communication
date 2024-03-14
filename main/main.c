@@ -33,9 +33,9 @@
 #include "../lib/lora.c"
 // #define 
 
-#define SSID "C23.11_2.4G"
+#define SSID "Delcho"
 
-#define PASS "1234567890"
+#define PASS "hoiconcac"
 
 
 static const char *TAG = "MQTT_TCP";
@@ -107,7 +107,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-        esp_mqtt_client_subscribe(client, "v1/devices/me/telemetry", 0);
+        esp_mqtt_client_subscribe(client, "v1/devices/me/rpc/request/+", 0);
 
         // Initialize DHT11 sensor
         DHT11_init(GPIO_NUM_26);
@@ -136,12 +136,31 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     case MQTT_EVENT_DATA:
         printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
         printf("DATA=%.*s\r\n", event->data_len, event->data);
-        if (strncmp(event->topic, "v1/devices/me/rpc/request/", event->topic_len) == 0) {
-            if (strncmp(event->data, "true", event->data_len) == 0) {
+        if (strncmp(event->topic, "v1/devices/me/rpc/request/", strlen("v1/devices/me/rpc/request/")) == 0) {
+            // Parse the JSON data
+            cJSON *json = cJSON_Parse(event->data);
+            if (json == NULL) {
+                printf("Error: Could not parse JSON data\r\n");
+                break;
+            }
+
+            // Get the "params" value
+            cJSON *params = cJSON_GetObjectItem(json, "params");
+            if (params == NULL) {
+                printf("Error: Could not get \"params\" value\r\n");
+                cJSON_Delete(json);
+                break;
+            }
+
+            ESP_LOGI("CONTROL", "RECEIVED: %s", cJSON_Print(params));
+
+            if (cJSON_IsTrue(params)) {
                 gpio_set_level(GPIO_NUM_12, 1);
-            } else if (strncmp(event->data, "false", event->data_len) == 0) {
+            } else if (cJSON_IsFalse(params)) {
                 gpio_set_level(GPIO_NUM_12, 0);
             }
+
+            cJSON_Delete(json);
         }
         break;
     case MQTT_EVENT_ERROR:
@@ -222,6 +241,8 @@ void task_tx(void *p)
 
 void app_main(void)
 {
+    esp_rom_gpio_pad_select_gpio(GPIO_NUM_12);
+    gpio_set_direction(GPIO_NUM_12, GPIO_MODE_OUTPUT);
     // char *message = "hello";
     lora_init();
     lora_set_frequency(434e6);

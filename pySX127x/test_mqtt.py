@@ -25,6 +25,7 @@ while True:
     # sleep(5)
     data = {"temperature": random.randint(20, 30), "humidity": random.randint(50, 100)}
     client.publish("v1/devices/me/telemetry", json.dumps(data), 1)
+    print(data)
     sleep(5)
 
 
