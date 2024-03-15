@@ -40,17 +40,33 @@ Below is short explanation of remaining files in the project folder.
 │   ├── lcd.c
 │   ├── lib.c
 │   └── lora.c
-├── LoRa-Mqtt
-│   └── mqtt_client.py
 ├── main
 │   ├── CMakeLists.txt
 │   ├── main.c
 │   └── test.html
 ├── process.txt
-├── README.md                ||           This is the file you are currently reading
+├── pySX127x
+│   ├── lora_util.py
+│   ├── mqtt_client.py
+│   ├── README.md
+│   ├── rx_cont.py
+│   ├── socket_client.py
+│   ├── socket_transceiver.py
+│   ├── SX127x
+│   │   ├── board_config.py
+│   │   ├── constants.py
+│   │   ├── __init__.py
+│   │   ├── LoRaArgumentParser.py
+│   │   └── LoRa.py
+│   ├── test_lora.py
+│   ├── test_mqtt.py
+│   ├── tx_beacon.py
+│   └── VERSION
+├── README.md
 ├── sdkconfig
 ├── sdkconfig.old
-└── workflow.txt                  
+└── workflow.txt
+                
 ```
 Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system. 
 They are not used or needed when building with CMake and idf.py.
