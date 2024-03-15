@@ -55,7 +55,7 @@ Below is short explanation of remaining files in the project folder.
 Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system. 
 They are not used or needed when building with CMake and idf.py.
 
-# iot-garden
+# LoRa-Communication
 
 This application uses an ESP32 to read data and publish it to the ThingsBoard platform.
 
@@ -70,5 +70,18 @@ This project was successfully built in one month.
 Through this project, I've learned about the ESP32, LoRa communication, and using SSH to control a Raspberry Pi. This was my first time coding with a Raspberry Pi and building a full embedded system, perhaps an IoT garden, or something similar.
 
 This project has been very beneficial for me. It has improved my programming skills, my ability to build an application, and my mindset about building a system in practice.
+
+
+## Description of each folder
+
+**lib**: This folder contains the libraries used in this project.
+**main**: This folder contains the main files of the project.
+**pySX127x**: This folder is used in the Raspberry Pi to receive data from the ESP and push data to ThingsBoard.
+
+## Description of functionanility in this project
+
+The ESP32 will collect data from the DHT11 sensor, push this data to ThingsBoard using the MQTT protocol, and send data to the Raspberry Pi using LoRa. The Raspberry Pi will then push this data to ThingsBoard using the MQTT protocol.
+
+We can also control the ESP32 from ThingsBoard to switch a connected device on or off.
 
 Dominic Ng.
