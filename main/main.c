@@ -16,10 +16,11 @@
 #include "lwip/sockets.h"
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
-
+// #include "driver/i2c.h"
 #include "esp_log.h"
 #include "mqtt_client.h"
 #include "../lib/DHT11.c"
+// #include "../lib/lcd.c"
 
 #include "cJSON.h"
 
@@ -30,12 +31,34 @@
 #define CONFIG_MOSI_GPIO GPIO_NUM_25
 #define CONFIG_SCK_GPIO  GPIO_NUM_18
 
+// CONFIG_I2C_MASTER_SDA
+
 #include "../lib/lora.c"
 // #define 
 
-#define SSID "Delcho"
+#define SSID "C23.11_2.4G"
 
-#define PASS "hoiconcac"
+#define PASS "1234567890"
+
+// static void i2c_master_init(void)
+// {
+//     int i2c_master_port = I2C_MASTER_NUM;
+//     i2c_config_t conf;
+//     conf.mode = I2C_MODE_MASTER;
+//     conf.sda_io_num = GPIO_NUM_21;
+//     conf.sda_pullup_en = GPIO_PULLUP_DISABLE;  // GY-2561 provides 10kΩ pullups
+//     conf.scl_io_num = GPIO_NUM_20;
+//     conf.scl_pullup_en = GPIO_PULLUP_DISABLE;  // GY-2561 provides 10kΩ pullups
+//     conf.master.clk_speed = I2C_MASTER_FREQ_HZ;
+//     i2c_param_config(i2c_master_port, &conf);
+//     i2c_driver_install(i2c_master_port, conf.mode,
+//                        I2C_MASTER_RX_BUF_LEN,
+//                        I2C_MASTER_TX_BUF_LEN, 0);
+// }
+
+// // Install the I2C driver
+// i2c_param_config(I2C_NUM_0, &i2c_config);
+// i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0);
 
 
 static const char *TAG = "MQTT_TCP";
@@ -133,6 +156,8 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     case MQTT_EVENT_PUBLISHED:
         ESP_LOGI(TAG, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
         break;
+
+        // Receive Request from the server to control the LED  (ON/OFF)
     case MQTT_EVENT_DATA:
         printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
         printf("DATA=%.*s\r\n", event->data_len, event->data);
@@ -239,13 +264,43 @@ void task_tx(void *p)
     }
 }
 
+// void display_sensor_data_task(void *i2c_lcd1602_info)
+// {
+//     i2c_lcd1602_info_t *lcd_info = (i2c_lcd1602_info_t *)i2c_lcd1602_info;
+//     char buffer[16];
+//     while (1)
+//     {
+//         struct dht11_reading dht_data = DHT11_read();
+//         sprintf(buffer, "Temp: %d", dht_data.temperature);
+//         lcd_display(lcd_info, buffer, 0, 0);
+//         sprintf(buffer, "Humidity: %d", dht_data.humidity);
+//         lcd_display(lcd_info, buffer, 1, 0);
+//         vTaskDelay(5000 / portTICK_PERIOD_MS);
+//     }
+// }
+// void lcd_setup(i2c_lcd1602_info_t * i2c_lcd1602_info, smbus_info_t * smbus_info)
+// {
+//     lcd_init(i2c_lcd1602_info, smbus_info);
+//     xTaskCreate(&display_sensor_data_task, "display_sensor_data_task", 2048, i2c_lcd1602_info, 5, NULL);
+// }
+
+
 void app_main(void)
 {
+
+    // i2c_lcd1602_info_t * i2c_lcd1602_info;
+    // smbus_info_t * smbus_info;
+    // i2c_master_init();
+    // lcd_setup(i2c_lcd1602_info, smbus_info);
+
+    // xTaskCreate(&display_sensor_data_task, "display_sensor_data_task", 2048, i2c_lcd1602_info, 5, NULL);
+    
     esp_rom_gpio_pad_select_gpio(GPIO_NUM_12);
     gpio_set_direction(GPIO_NUM_12, GPIO_MODE_OUTPUT);
     // char *message = "hello";
     lora_init();
-    lora_set_frequency(434e6);
+    lora_set_frequency(868e6);
+    lora_set_bandwidth(125e3);
     lora_enable_crc();
 
     //==============================//

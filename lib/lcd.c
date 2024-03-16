@@ -5,6 +5,7 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_log.h"
+#include "./include/lcd.h"
 
 // #include "i2c-lcd1602.h"
 
