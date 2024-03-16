@@ -1,33 +1,84 @@
-import paho.mqtt.client as mqtt
 from time import sleep
-import random
-import json
 
-def on_connect(client, userdata, flags, rc, properties=None):
-    print("Connected with result code "+str(rc))
+from SX127x.LoRa import *
 
-# The callback for when a PUBLISH message is received from the server.
-def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
+from SX127x.board_config import BOARD
 
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-client.on_connect = on_connect
-client.on_message = on_message
+BOARD.setup()
 
-client.username_pw_set("Nhat", "Nhat")
-client.connect("iot.tdlogy.com", 1883, 60)
+class LoRaRcvCont(LoRa):
 
-client.loop_start()
+    def __init__(self, verbose=False):
 
-import json
-import random
-while True:
-    # sleep(5)
-    data = {"temperature": random.randint(20, 30), "humidity": random.randint(50, 100)}
-    client.publish("v1/devices/me/telemetry", json.dumps(data), 1)
-    print(data)
-    sleep(5)
+        super(LoRaRcvCont, self).__init__(verbose)
 
+        self.set_mode(MODE.SLEEP)
 
-# client.loop_stop()
-# client.disconnect()
+        self.set_dio_mapping([0] * 6)
+
+    def start(self):
+
+        self.reset_ptr_rx()
+
+        self.set_mode(MODE.RXCONT)
+
+        while True:
+
+            sleep(.5)
+
+            rssi_value = self.get_rssi_value()
+
+            status = self.get_modem_status()
+
+            sys.stdout.flush()
+
+            
+
+    def on_rx_done(self):
+
+        print("\nReceived: ")
+
+        self.clear_irq_flags(RxDone=1)
+
+        payload = self.read_payload(nocheck=True)
+
+        print(bytes(payload).decode("utf-8",'ignore'))
+
+        self.set_mode(MODE.SLEEP)
+
+        self.reset_ptr_rx()
+
+        self.set_mode(MODE.RXCONT) 
+
+lora = LoRaRcvCont(verbose=False)
+
+lora.set_mode(MODE.STDBY)
+lora.set_freq(868.0)
+
+#  Medium Range  Defaults after init are 434.0MHz, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on 13 dBm
+
+lora.set_pa_config(pa_select=1)
+lora.set_freq(868.0)
+try:
+    while 1:
+
+        lora.start()
+        lora.on_rx_done()
+
+except KeyboardInterrupt:
+
+    sys.stdout.flush()
+
+    print("")
+
+    sys.stderr.write("KeyboardInterrupt\n")
+
+finally:
+
+    sys.stdout.flush()
+
+    print("")
+
+    lora.set_mode(MODE.SLEEP)
+
+    BOARD.teardown()
