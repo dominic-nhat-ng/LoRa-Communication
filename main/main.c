@@ -241,6 +241,8 @@ static void mqtt_app_start(void)
     xTaskCreate(&mqtt_publish_task, "mqtt_publish_task", 4096, (void *)client, 5, NULL);
 }
 
+
+
 void task_tx(void *p)
 {
     while(1)
@@ -258,6 +260,7 @@ void task_tx(void *p)
         lora_send_packet((uint8_t *)json_data, json_data_length);
 
         ESP_LOGI("CHECKING TRANSMIT DATA", "Data sent successfully");
+        ESP_LOGI("CHECKING TRANSMIT DATA", "Data sent: %s", json_data);
 
         // Free the JSON data
         free(json_data);
@@ -299,8 +302,9 @@ void app_main(void)
     gpio_set_direction(GPIO_NUM_12, GPIO_MODE_OUTPUT);
     // char *message = "hello";
     lora_init();
-    lora_set_frequency(868e6);
+    lora_set_frequency(433e6);
     lora_set_bandwidth(125e3);
+    lora_set_coding_rate(5);
     lora_enable_crc();
 
     //==============================//

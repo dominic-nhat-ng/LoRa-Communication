@@ -55,7 +55,8 @@ lora = LoRaRcvCont(verbose=False)
 lora.set_mode(MODE.STDBY)
 
 lora.set_pa_config(pa_select=1)
-lora.set_freq(434.0)
+lora.set_freq(433.0)
+lora.set_bw(BW.BW125)
 
 try:
 

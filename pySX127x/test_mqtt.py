@@ -58,7 +58,7 @@ lora.set_freq(868.0)
 #  Medium Range  Defaults after init are 434.0MHz, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on 13 dBm
 
 lora.set_pa_config(pa_select=1)
-lora.set_freq(868.0)
+lora.set_freq(433.0)
 try:
     while 1:
 

@@ -1,0 +1,24 @@
+
+
+void task_tx(void *p)
+{
+    while(1)
+    {
+        struct dht11_reading dht_data = DHT11_read();
+
+        char *json_data = create_json(dht_data.temperature, dht_data.humidity);
+
+        // Get the length of the JSON data
+        int json_data_length = strlen(json_data);
+
+        vTaskDelay(5000/portTICK_PERIOD_MS);
+
+        // Send the JSON data via LoRa
+        lora_send_packet((uint8_t *)json_data, json_data_length);
+
+        ESP_LOGI("CHECKING TRANSMIT DATA", "Data sent successfully");
+
+        // Free the JSON data
+        free(json_data);
+    }
+}
