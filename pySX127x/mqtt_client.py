@@ -14,23 +14,25 @@ class LoRaRcvCont(LoRa):
 
         self.set_mode(MODE.SLEEP)
 
-        self.set_dio_mapping([0] * 6)
 
+        self.set_dio_mapping([0] * 6)
     def start(self):
 
         self.reset_ptr_rx()
-
         self.set_mode(MODE.RXCONT)
+        
 
         while True:
 
-            sleep(.5)
+            self.on_rx_done()
 
             rssi_value = self.get_rssi_value()
 
             status = self.get_modem_status()
-
+            print(f"status: {status}")
+            print(f"rssi: {rssi_value}")
             sys.stdout.flush()
+            sleep(2)
 
             
 
@@ -40,26 +42,26 @@ class LoRaRcvCont(LoRa):
 
         self.clear_irq_flags(RxDone=1)
 
-        payload = self.read_payload(nocheck=True)
+        payload = self.read_payload(nocheck=False)
+        if payload is None:
+            print("No data returned")
 
-        print(bytes(payload).decode("utf-8",'ignore'))
+        else:
+            print(bytes(payload).decode("utf-8",'ignore'))
 
         self.set_mode(MODE.SLEEP)
 
         self.reset_ptr_rx()
 
         self.set_mode(MODE.RXCONT) 
-
+        
 lora = LoRaRcvCont(verbose=False)
-
 lora.set_mode(MODE.STDBY)
-
+lora.set_bw(BW.BW62_5)
 lora.set_pa_config(pa_select=1)
-lora.set_freq(433.0)
-lora.set_bw(BW.BW125)
+lora.set_freq(434.0)
 
 try:
-
     lora.start()
 
 except KeyboardInterrupt:

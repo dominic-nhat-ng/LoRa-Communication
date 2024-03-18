@@ -291,24 +291,18 @@ void task_tx(void *p)
 void app_main(void)
 {
 
-    // i2c_lcd1602_info_t * i2c_lcd1602_info;
-    // smbus_info_t * smbus_info;
-    // i2c_master_init();
-    // lcd_setup(i2c_lcd1602_info, smbus_info);
-
-    // xTaskCreate(&display_sensor_data_task, "display_sensor_data_task", 2048, i2c_lcd1602_info, 5, NULL);
-    
-    esp_rom_gpio_pad_select_gpio(GPIO_NUM_12);
-    gpio_set_direction(GPIO_NUM_12, GPIO_MODE_OUTPUT);
     // char *message = "hello";
     lora_init();
     lora_set_frequency(433e6);
     lora_set_bandwidth(125e3);
-    lora_set_coding_rate(5);
+    // lora_set_coding_rate(5);
+
     lora_enable_crc();
 
     //==============================//
     xTaskCreate(&task_tx, "task_tx", 2048, NULL, 5, NULL);
+
+    //==============================//
     
     nvs_flash_init();
     wifi_connection();
